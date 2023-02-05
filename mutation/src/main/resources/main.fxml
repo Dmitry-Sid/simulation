@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.layout.Pane?>
+<Pane xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ru.dsid.simulation.mutation.controller.MainController"
+      prefHeight="800" prefWidth="800">
+    <Canvas fx:id="canvas" height="750" width="750" layoutX="25" layoutY="25"
+            style="-fx-border-width: 5;-fx-border-color: black"/>
+</Pane>

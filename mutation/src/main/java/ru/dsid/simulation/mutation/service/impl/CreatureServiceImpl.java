@@ -1,9 +1,11 @@
 package ru.dsid.simulation.mutation.service.impl;
 
+import org.springframework.stereotype.Service;
 import ru.dsid.simulation.mutation.MutationConstants;
 import ru.dsid.simulation.mutation.pojo.MutationCreature;
 import ru.dsid.simulation.mutation.service.CreatureService;
 
+@Service
 public class CreatureServiceImpl implements CreatureService {
     @Override
     public void calculateEnergy(MutationCreature creature, double time) {

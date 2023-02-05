@@ -14,7 +14,7 @@ public class Utils {
         return x2 - x1;
     }
 
-    public static void move(MovingObject movingObject, long time) {
+    public static void move(MovingObject movingObject, double time) {
         final double distance = movingObject.getSpeed() * time;
         if (calculateDistance(movingObject.getPoint(), movingObject.getDestinationPoint()) <= distance) {
             movingObject.setPoint(movingObject.getDestinationPoint());

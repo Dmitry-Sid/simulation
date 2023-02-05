@@ -9,5 +9,7 @@ public interface SimulationService {
 
     void stop();
 
+    void setRate(double rate);
+
     int getIteration();
 }

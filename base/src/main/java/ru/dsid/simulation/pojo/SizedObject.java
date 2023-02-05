@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class SizedObject {
+public class SizedObject {
     private volatile double size;
 }

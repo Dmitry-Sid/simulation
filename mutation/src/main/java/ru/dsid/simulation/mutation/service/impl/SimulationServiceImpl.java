@@ -1,5 +1,7 @@
 package ru.dsid.simulation.mutation.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import ru.dsid.simulation.core.Utils;
 import ru.dsid.simulation.core.service.BaseSimulationService;
 import ru.dsid.simulation.core.service.ReplicationService;
@@ -12,15 +14,16 @@ import ru.dsid.simulation.pojo.Food;
 import ru.dsid.simulation.pojo.Point;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Slf4j
+@Service
 public class SimulationServiceImpl extends BaseSimulationService implements MutationSimulationService {
     private static final int INITIAL_CREATURE_COUNT = 50;
-    private static final int FOOD_COUNT = 50;
-    private static final long TIME_SLEEP = 100;
+    private static final int FOOD_COUNT = 30;
+    private static final long TIME_SLEEP = 30;
     private static final double MIN_DISTANCE = 0.1;
 
     private final Area area = new Area(100, 100);
@@ -53,29 +56,50 @@ public class SimulationServiceImpl extends BaseSimulationService implements Muta
 
     @Override
     protected void runIteration() {
+        log.info("iteration {} started", iteration.get());
         initIteration();
-        while (!foodList.isEmpty() || !creatures.isEmpty() || !isAllCreaturesFed() || !stop) {
+        while (!foodList.isEmpty() && !creatures.isEmpty() && !isAllCreaturesFed() && !stop) {
             checkPause();
-            for (Iterator<MutationCreature> iterator = creatures.iterator(); iterator.hasNext(); ) {
-                final MutationCreature creature = iterator.next();
+            final long begin = System.currentTimeMillis();
+            try {
+                Thread.sleep(TIME_SLEEP);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            final double time = rate * (System.currentTimeMillis() - begin) / 1000;
+            creatures.removeIf(creature -> {
                 feed(creature);
                 if (creature.isFed()) {
-                    continue;
+                    return false;
                 }
                 if (!creatureService.isAlive(creature)) {
-                    iterator.remove();
-                    continue;
+                    return true;
                 }
                 setDestination(creature);
-                try {
-                    Thread.sleep(TIME_SLEEP);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                move(creature, TIME_SLEEP);
-            }
+                move(creature, time);
+                return false;
+            });
         }
         finishIteration();
+        log.info("foodList.size {}, creatures.size {}, isAllCreaturesFed {}, stop {}", foodList.size(), creatures.size(), isAllCreaturesFed(), stop);
+        printStatistic();
+        log.info("iteration {} finished", iteration.get());
+        if (creatures.isEmpty()) {
+            stop();
+        }
+    }
+
+    private void printStatistic() {
+        double avgSize = 0;
+        double avgSpeed = 0;
+        double avgRange = 0;
+        for (MutationCreature creature : creatures) {
+            avgSize += creature.getSize();
+            avgSpeed += creature.getSpeed();
+            avgRange += creature.getRange();
+        }
+        log.info("statistic: avgSize {}, avgSpeed {}, avgRange {}", avgSize / creatures.size(),
+                avgSpeed / creatures.size(), avgRange / creatures.size());
     }
 
     private synchronized void checkPause() {
@@ -84,7 +108,7 @@ public class SimulationServiceImpl extends BaseSimulationService implements Muta
                 return;
             }
             try {
-                wait(10 * TIME_SLEEP);
+                wait(100);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -139,7 +163,7 @@ public class SimulationServiceImpl extends BaseSimulationService implements Muta
     }
 
     private void feed(MutationCreature creature) {
-        if (creature.isFed() || creature.getTarget() == null) {
+        if (creature.isFed() || creature.getTarget() == null || !foodList.contains(creature.getTarget())) {
             return;
         }
         if (canTakeFood(creature)) {
@@ -151,17 +175,17 @@ public class SimulationServiceImpl extends BaseSimulationService implements Muta
     }
 
     private boolean canTakeFood(MutationCreature creature) {
-        return Utils.calculateDistance(Utils.calculatePoint(creature.getPoint(), creature.getSize() / 2,
-                Utils.calculateAngle(creature.getPoint(), creature.getDestinationPoint())), creature.getTarget().getPoint()) <= MIN_DISTANCE;
+        return Utils.calculateDistance(creature.getPoint(), creature.getTarget().getPoint()) <= creature.getSize();
     }
 
-    private void move(MutationCreature creature, long time) {
+    private void move(MutationCreature creature, double time) {
         Utils.move(creature, time);
         creatureService.calculateEnergy(creature, time);
     }
 
     private void finishIteration() {
         foodList.clear();
+        creatures.removeIf(creature -> !creature.isFed());
     }
 
     private Point generateRandomBoundaryPoint() {
@@ -189,6 +213,7 @@ public class SimulationServiceImpl extends BaseSimulationService implements Muta
     private void generateFood() {
         for (int i = 0; i < FOOD_COUNT; i++) {
             final Food food = new Food();
+            food.setSize(0.1);
             food.setPoint(generateRandomPoint());
             foodList.add(food);
         }
@@ -197,6 +222,11 @@ public class SimulationServiceImpl extends BaseSimulationService implements Muta
     private Point generateRandomPoint() {
         return new Point(random.nextDouble() * area.getLength(),
                 random.nextDouble() * area.getWidth());
+    }
+
+    @Override
+    public Area getArea() {
+        return area;
     }
 
     @Override

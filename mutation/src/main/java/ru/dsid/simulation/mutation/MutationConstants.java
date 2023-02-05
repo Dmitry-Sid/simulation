@@ -1,7 +1,7 @@
 package ru.dsid.simulation.mutation;
 
 public interface MutationConstants {
-    double DEFAULT_RANGE = 10; // м
+    double DEFAULT_RANGE = 5; // м
     double ENERGY_RANGE_RATE = 2; // дж/м * сек
     double DEFAULT_SIZE = 0.5; //м
     double DENSITY = 1000; // кг/м3

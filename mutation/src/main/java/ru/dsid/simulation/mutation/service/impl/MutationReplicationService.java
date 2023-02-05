@@ -1,9 +1,11 @@
 package ru.dsid.simulation.mutation.service.impl;
 
+import org.springframework.stereotype.Service;
 import ru.dsid.simulation.core.service.BaseReplicationService;
 import ru.dsid.simulation.mutation.pojo.MutationCreature;
 import ru.dsid.simulation.mutation.service.MutationService;
 
+@Service
 public class MutationReplicationService extends BaseReplicationService<MutationCreature> {
     private final MutationService mutationService;
 

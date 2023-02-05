@@ -1,11 +1,15 @@
 package ru.dsid.simulation.mutation.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import ru.dsid.simulation.mutation.pojo.MutationCreature;
 import ru.dsid.simulation.mutation.service.CreatureService;
 import ru.dsid.simulation.mutation.service.MutationService;
 
 import java.util.Random;
 
+@Slf4j
+@Service
 public class MutationServiceImpl implements MutationService {
     private final CreatureService creatureService;
 
@@ -34,15 +38,18 @@ public class MutationServiceImpl implements MutationService {
     }
 
     private void changeSize(MutationCreature creature, int sign) {
+        log.info("size mutation, sign {}", sign);
         creature.setSize(creature.getSize() * (1 + sign * 0.05));
         creatureService.calculateSpeed(creature);
     }
 
     private void changeSpeed(MutationCreature creature, int sign) {
+        log.info("speed mutation, sign {}", sign);
         creature.setSpeed(creature.getSpeed() * (1 + sign * 0.1));
     }
 
     private void changeRange(MutationCreature creature, int sign) {
+        log.info("range mutation, sign {}", sign);
         creature.setRange(creature.getRange() * (1 + sign * 0.2));
     }
 }

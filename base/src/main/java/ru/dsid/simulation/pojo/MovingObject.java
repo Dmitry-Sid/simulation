@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class MovingObject extends PointObject {
+public class MovingObject extends PointObject {
     private volatile double speed;
     private volatile Point destinationPoint;
 }
