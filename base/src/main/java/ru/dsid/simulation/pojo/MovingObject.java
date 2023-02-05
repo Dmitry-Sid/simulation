@@ -11,4 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public abstract class MovingObject extends PointObject {
     private volatile double speed;
+    private volatile Point destinationPoint;
 }

@@ -10,6 +10,5 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class PointObject extends SizedObject {
-    private volatile double pointX;
-    private volatile double pointY;
+    private volatile Point point;
 }

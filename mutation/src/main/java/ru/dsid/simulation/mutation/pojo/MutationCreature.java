@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.dsid.simulation.pojo.Creature;
+import ru.dsid.simulation.pojo.Food;
 
 @Setter
 @Getter
@@ -13,4 +14,6 @@ import ru.dsid.simulation.pojo.Creature;
 public class MutationCreature extends Creature {
     private volatile double range;
     private volatile double energy;
+    private volatile boolean fed;
+    private volatile Food target;
 }

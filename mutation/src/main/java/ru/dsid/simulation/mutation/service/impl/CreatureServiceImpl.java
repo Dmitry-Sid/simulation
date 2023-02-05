@@ -7,18 +7,26 @@ import ru.dsid.simulation.mutation.service.CreatureService;
 public class CreatureServiceImpl implements CreatureService {
     @Override
     public void calculateEnergy(MutationCreature creature, double time) {
-        creature.setEnergy(creature.getEnergy() - calculateLoss(creature, time));
+        creature.setEnergy(Math.max(creature.getEnergy() - calculateLoss(creature, time), 0.0));
+    }
+
+    @Override
+    public boolean isAlive(MutationCreature creature) {
+        return creature.isFed() || creature.getEnergy() > 0;
     }
 
     private double calculateLoss(MutationCreature creature, double time) {
-        return (MutationConstants.SIZE_MASS_RATE * Math.pow(creature.getSize(), 3) *
-                Math.pow(creature.getSpeed(), 2) +
+        return ((calculateMass(creature) *
+                Math.pow(creature.getSpeed(), 2)) / 2 +
                 MutationConstants.ENERGY_RANGE_RATE * creature.getRange()) * time;
     }
 
     @Override
     public void calculateSpeed(MutationCreature creature) {
-        creature.setSpeed(2 * MutationConstants.CREATURE_ENERGY /
-                (MutationConstants.SIZE_MASS_RATE * Math.pow(creature.getSize(), 3)));
+        creature.setSpeed(Math.sqrt(2 * MutationConstants.CREATURE_POWER / calculateMass(creature)));
+    }
+
+    private double calculateMass(MutationCreature creature) {
+        return MutationConstants.DENSITY * Math.pow(creature.getSize(), 3);
     }
 }
