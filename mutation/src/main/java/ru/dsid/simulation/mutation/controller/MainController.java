@@ -4,6 +4,8 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.Spinner;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import net.rgielen.fxweaver.core.FxmlView;
@@ -21,13 +23,56 @@ public class MainController {
     @FXML
     public Canvas canvas;
 
+    @FXML
+    public Button playBut;
+
+    @FXML
+    public Button pauseBut;
+
+    @FXML
+    public Button stopBut;
+
+    @FXML
+    public Spinner<Double> rateSpinner;
+
     public MainController(MutationSimulationService simulationService) {
         this.simulationService = simulationService;
     }
 
     @FXML
     public void initialize() {
-        new Thread(simulationService::start).start();
+        playBut.setOnAction(e -> {
+            if (simulationService.isPlaying()) {
+                return;
+            }
+            if (simulationService.isPaused()) {
+                simulationService.resume();
+            } else {
+                new Thread(simulationService::start).start();
+            }
+            playBut.setDisable(true);
+            pauseBut.setDisable(false);
+            stopBut.setDisable(false);
+        });
+        pauseBut.setOnAction(e -> {
+            if (!simulationService.isPlaying()) {
+                return;
+            }
+            simulationService.pause();
+            playBut.setDisable(false);
+            pauseBut.setDisable(true);
+        });
+        stopBut.setOnAction(e -> {
+            if (!simulationService.isPlaying()) {
+                return;
+            }
+            simulationService.stop();
+            playBut.setDisable(false);
+            pauseBut.setDisable(true);
+            stopBut.setDisable(true);
+        });
+        rateSpinner.getValueFactory().setValue(simulationService.getRate());
+        rateSpinner.valueProperty().addListener((obs, oldValue, newValue) -> simulationService.setRate(newValue));
         new Thread(() -> {
             while (true) {
                 Platform.runLater(this::draw);

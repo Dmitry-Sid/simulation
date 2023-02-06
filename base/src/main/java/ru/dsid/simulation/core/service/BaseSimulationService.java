@@ -7,12 +7,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public abstract class BaseSimulationService implements SimulationService {
     protected final AtomicInteger iteration = new AtomicInteger();
-    protected volatile boolean stop;
+    protected volatile boolean stop = true;
     protected volatile boolean pause;
-    protected volatile double rate = 1;
+    protected volatile double rate = 1.0;
 
     @Override
     public void start() {
+        if (isPlaying()) {
+            return;
+        }
+        pause = false;
+        stop = false;
         clear();
         iteration.set(0);
         init();
@@ -24,6 +29,11 @@ public abstract class BaseSimulationService implements SimulationService {
         log.info("simulation finished");
     }
 
+    @Override
+    public boolean isPlaying() {
+        return !pause && !stop;
+    }
+
     protected abstract void init();
 
     protected abstract void runIteration();
@@ -32,6 +42,11 @@ public abstract class BaseSimulationService implements SimulationService {
     public synchronized void pause() {
         this.pause = true;
         notifyAll();
+    }
+
+    @Override
+    public boolean isPaused() {
+        return pause;
     }
 
     @Override
@@ -50,8 +65,18 @@ public abstract class BaseSimulationService implements SimulationService {
     }
 
     @Override
+    public boolean isStopped() {
+        return stop;
+    }
+
+    @Override
     public void setRate(double rate) {
         this.rate = rate;
+    }
+
+    @Override
+    public double getRate() {
+        return rate;
     }
 
     protected abstract void clear();
